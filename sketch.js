@@ -1,6 +1,7 @@
 let handpose;
 let video;
 let predictions = [];
+let points = [];
 
 function setup() {
   createCanvas(640, 480);
@@ -26,19 +27,30 @@ function modelReady() {
 function draw() {
   image(video, 0, 0, width, height);
 
-  // We can call both functions to draw all keypoints and the skeletons
-  drawKeypoints();
-}
+  // Call the findKeypoints function to push all keypoints into array
+  findKeypoints();
 
-// A function to draw ellipses over the detected keypoints
-function drawKeypoints() {
-  for (let i = 0; i < predictions.length; i += 1) {
-    const prediction = predictions[i];
-    for (let j = 0; j < prediction.landmarks.length; j += 1) {
-      const keypoint = prediction.landmarks[j];
-      fill(0, 255, 0);
-      noStroke();
-      ellipse(keypoint[0], keypoint[1], 10, 10);
+  // Draw lines between keypoints within the array
+  for (let i = 0; i < points.length - 1; i+=1){
+
+    /* CODE TO DRAW ELLIPSES
+    noStroke();
+    ellipse(arr[i][0], arr[i][1], 10); */
+
+    if (points.length > 2){
+      let nextindex = i + 1; 
+      stroke(255, 204, 0);
+      strokeWeight(4);
+      // line(starting point x, starting point y, end point x, end point y)
+      line(points[i][0],points[i][1], points[nextindex][0],points[nextindex][1]);
     }
   }
 }
+
+// A function to push keypoints into an array
+function findKeypoints() {
+  for (let i = 0; i < predictions.length; i += 1) {
+    const prediction = predictions[i];
+    points.push(prediction.annotations.indexFinger[3]);
+    }
+  }
