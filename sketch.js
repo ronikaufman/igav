@@ -2,8 +2,13 @@ let handpose;
 let video;
 let predictions = [];
 
-let points = []; // array of drawn points
+let lines = []; // array of drawn lines (each line is an array)
+let currentLine = [];
 let eraseStart = 0; // counts frames since we entered the erase zone
+let colors = [[255, 204, 0], [0], [255]];
+let colorIdx = 0; // current color index
+let colorOfLines = []; // color index of each line
+let changeColorCounter = 0;
 
 function setup() {
   createCanvas(640, 480);
@@ -36,19 +41,45 @@ function draw() {
 
   // erase zone:
   noStroke();
-  fill(255, 0, 0);
-  rect(0, 0, 80, 80);
+  fill(246, 0, 0);
+  rect(0, 0, 80, 80, 0, 0, 10, 0);
+  fill(198, 49, 49);
+  rect(80 - eraseStart/3*8, 0, eraseStart/3*8, 80, 0, 0, 10, 0);
+  stroke(255);
+  strokeWeight(3);
+  line(30, 30, 50, 50);
+  line(30, 50, 50, 30);
 
   // detect which fingers are up
   let gesture = findGesture();
 
+  // detect index and major fingers up: change color gesture
+  changeColorCounter++;
+  if ((changeColorCounter > 10) && (!keyIsPressed) && (gesture[1] == 1 && gesture[2] == 1 && gesture[3] == 0 && gesture[4] == 0)) {
+    colorIdx = (colorIdx + 1)%colors.length;
+    changeColorCounter = 0;
+  }
+
+  // draw the color selection at the bottom
+  noStroke();
+  let x = width - 25;
+  let y = height - 25
+  for (let i = 0; i < colors.length; i++) {
+    let d;
+    if (i == colorIdx) {
+      d = 30;
+    } else {
+      d = 15;
+    }
+    fill(colors[i]);
+    circle(x, y, d);
+    x -= 30;
+  }
+
+  let indexPoint = findIndex();
+
   // check if we want to erase
   if (gesture[1] == 1) {
-    let indexPoint;
-    for (let i = 0; i < predictions.length; i += 1) {
-      const prediction = predictions[i];
-      indexPoint = prediction.annotations.indexFinger[3];
-    }
     if (indexPoint[0] < 80 && indexPoint[1] < 80) {
       eraseStart++;
     } else {
@@ -57,40 +88,51 @@ function draw() {
     // erase!
     if (eraseStart > 30) {
       //console.log("erase");
-      points = [];
+      lines = [];
+      currentLine = [];
     }
   }
 
-  //console.log(gesture);
-  if (onlyIndexUp(gesture)) {
+  if (keyIsPressed && key == "d") {
+    lines = [];
+    currentLine = [];
+  }
+
+  // draw when index is up and space bar is pressed
+  if (indexUp(gesture) && keyIsPressed && key == " ")  {
     // Call the findKeypoints function to push all keypoints into array
-    findKeypoints();
+    currentLine.push(indexPoint);
   }
   
-  // Draw our line
+  // Draw our lines
   noFill();
-  stroke(255, 204, 0);
   strokeWeight(4);
+  
+  for (i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    stroke(colors[colorOfLines[i]]);
+    beginShape();
+    for (let p of line) {
+      curveVertex(p[0], p[1]);
+    }
+    endShape();
+  }
+  stroke(colors[colorIdx]);
   beginShape();
-  // Draw lines between keypoints within the array
-  for (let i = 0; i < points.length; i+=1){
-
-      /* CODE TO DRAW ELLIPSES
-      noStroke();
-      ellipse(arr[i][0], arr[i][1], 10); */
-
-    curveVertex(points[i][0],points[i][1]);
+  for (let p of currentLine) {
+    curveVertex(p[0], p[1]);
   }
   endShape();
 }
 
 // A function to push keypoints into an array
-function findKeypoints() {
+function findIndex() {
   for (let i = 0; i < predictions.length; i += 1) {
     const prediction = predictions[i];
-    points.push(prediction.annotations.indexFinger[3]);
+    noFill();
     stroke(0, 0, 255);
     circle(prediction.annotations.indexFinger[3][0], prediction.annotations.indexFinger[3][1], 5);
+    return prediction.annotations.indexFinger[3];
   }
 }
 
@@ -115,7 +157,15 @@ function findKeypoints() {
     return out;
   }
 
-  // Returns true if only the index is up (ignores the thumb, which can be problematic)
-  function onlyIndexUp(gesture) {
-    return ((gesture[1] == 1) && (gesture[2] == 0) && (gesture[3] == 0) && (gesture[4] == 0));
+  // Returns true if the index is up (ignores the other fingers)
+  function indexUp(gesture) {
+    return (gesture[1] == 1);
+  }
+
+  function keyReleased() {
+    if (key == " ") {
+      lines.push(currentLine);
+      colorOfLines.push(colorIdx);
+      currentLine = [];
+    }
   }
