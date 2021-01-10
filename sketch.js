@@ -2,6 +2,7 @@ let handpose;
 let video;
 let predictions = [];
 
+let sizeFactor;
 let lines = []; // array of drawn lines (each line is an array)
 let currentLine = []; // array of currently drawn line
 let eraseStart = 0; // counts frames since we entered the erase zone
@@ -9,9 +10,15 @@ let colors = [[255, 204, 0], [0], [255]]; // possible drawing colors
 let colorIdx = 0; // current color index
 let colorOfLines = []; // color index of each line
 let changeColorCounter = 0; // counts how many frames since the last color change
+let stayColorCounter = 0; // counts how many frames since we didn't try to change color
+
+const ERASE_TIME = 30; // how much frames on the erase button are needed to erase
+const CHANGE_COLOR_TIME = 20; // how much frames with the "peace" gesture are needed to change color
 
 function setup() {
-  createCanvas(640, 480);
+  let h = windowHeight - 60 - 147;
+  sizeFactor = h/480;
+  createCanvas(640*sizeFactor, h);
   video = createCapture(VIDEO);
   video.size(width, height);
 
@@ -73,7 +80,8 @@ function draw() {
   fill(246, 0, 0);
   rect(0, 0, eraseButtonSize, eraseButtonSize, 0, 0, 10, 0);
   fill(198, 49, 49);
-  rect(eraseButtonSize - eraseStart/3*8, 0, eraseStart/3*8, eraseButtonSize, 0, 0, 10, 0);
+  let prog = eraseButtonSize/ERASE_TIME;
+  rect(eraseButtonSize - eraseStart*prog, 0, eraseStart*prog, eraseButtonSize, 0, 0, 10, 0);
   stroke(255);
   strokeWeight(3);
   line(30, 30, 50, 50);
@@ -87,7 +95,7 @@ function draw() {
       eraseStart = 0;
     }
     // erase!
-    if (eraseStart > 30) {
+    if (eraseStart > ERASE_TIME) {
       lines = [];
       currentLine = [];
     }
@@ -125,12 +133,30 @@ function draw() {
     circle(x, y, d);
     x -= colorBubbleSize;
   }
+  // loading next color
+  if (changeColorCounter > 0) {
+    stroke(0, 0, 255);
+    strokeWeight(2);
+    noFill();
+    x = width - 25 - colorBubbleSize*((colorIdx+1)%colors.length);
+    let prog = (changeColorCounter-stayColorCounter)/CHANGE_COLOR_TIME;
+    arc(x, y, colorBubbleSize/2, colorBubbleSize/2, PI/2, PI/2+TWO_PI*prog);
+  }
 
   // detect index and major fingers up: change color gesture
-  changeColorCounter++;
-  if ((changeColorCounter > 20) && (!keyIsPressed) && peaceSymbolUp(gesture)) {
+  if (peaceSymbolUp(gesture) && (eraseStart < 10)) {
+    changeColorCounter++;
+  } else {
+    stayColorCounter++;
+  }
+
+  if ((changeColorCounter > CHANGE_COLOR_TIME) && (!keyIsPressed)) {
     colorIdx = (colorIdx + 1)%colors.length;
     changeColorCounter = 0;
+  }
+  if (stayColorCounter > changeColorCounter) {
+    changeColorCounter = 0;
+    stayColorCounter = 0;
   }
   // ********************
 
@@ -156,8 +182,8 @@ function findIndex() {
     }
     noFill();
     stroke(0, 0, 255);
-    circle(tip[0], tip[1], 5);
-    return tip;
+    circle(tip[0]*sizeFactor, tip[1]*sizeFactor, 5);
+    return [tip[0]*sizeFactor, tip[1]*sizeFactor];
   }
   return null;
 }
@@ -202,7 +228,9 @@ function peaceSymbolUp(gesture) {
 function drawLine(line) {
   beginShape();
   for (let p of line) {
-    curveVertex(p[0], p[1]);
+    if (p) {
+      curveVertex(p[0], p[1]);
+    }
   }
   endShape();
 }
