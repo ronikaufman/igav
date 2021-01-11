@@ -5,6 +5,7 @@ let predictions = [];
 let sizeFactor;
 let lines = []; // array of drawn lines (each line is an array)
 let currentLine = []; // array of currently drawn line
+
 let eraseStart = 0; // counts frames since we entered the erase zone
 let colors = [[255, 204, 0], [0], [255]]; // possible drawing colors
 let colorIdx = 0; // current color index
@@ -12,8 +13,15 @@ let colorOfLines = []; // color index of each line
 let changeColorCounter = 0; // counts how many frames since the last color change
 let stayColorCounter = 0; // counts how many frames since we didn't try to change color
 
+let strokeSizes = [2, 4, 8]; // possible drawing colors
+let sizeIdx = 0; // current color index
+let sizeOfLines = []; // color index of each line
+let changeSizeCounter = 0; // counts how many frames since the last color change
+let staySizeCounter = 0; // counts how many frames since we didn't try to change color
+
 const ERASE_TIME = 30; // how much frames on the erase button are needed to erase
 const CHANGE_COLOR_TIME = 20; // how much frames with the "peace" gesture are needed to change color
+const CHANGE_SIZE_TIME = 20; // how much frames with the "peace" gesture are needed to change color
 
 function setup() {
   let h = windowHeight - 60 - 147;
@@ -56,11 +64,12 @@ function draw() {
 
   // Draw the lines
   noFill();
-  strokeWeight(4);
   for (i = 0; i < lines.length; i++) {
+    strokeWeight(strokeSizes[sizeOfLines[i]]);
     stroke(colors[colorOfLines[i]]);
     drawLine(lines[i]);
   }
+  strokeWeight(strokeSizes[sizeIdx]);
   stroke(colors[colorIdx]);
   drawLine(currentLine);
 
@@ -98,6 +107,8 @@ function draw() {
     if (eraseStart > ERASE_TIME) {
       lines = [];
       currentLine = [];
+      colorOfLines = [];
+      sizeOfLines = [];
     }
   }
 
@@ -105,6 +116,8 @@ function draw() {
   if (keyIsPressed && key == "d") {
     lines = [];
     currentLine = [];
+    colorOfLines = [];
+    sizeOfLines = [];
     noStroke();
     fill(198, 49, 49);
     rect(0, 0, eraseButtonSize, eraseButtonSize, 0, 0, 10, 0);
@@ -161,6 +174,25 @@ function draw() {
   // ********************
 
 
+  // ********** ABOUT STROKE SIZE **********
+  // detect index and pinkie fingers up: change stroke size
+  if (rockGestureUp(gesture) && (eraseStart < 10)) {
+    changeSizeCounter++;
+  } else {
+    staySizeCounter++;
+  }
+
+  if ((changeSizeCounter > CHANGE_SIZE_TIME) && (!keyIsPressed)) {
+    sizeIdx = (sizeIdx + 1)%strokeSizes.length;
+    changeSizeCounter = 0;
+  }
+  if (staySizeCounter > changeSizeCounter) {
+    changeSizeCounter = 0;
+    staySizeCounter = 0;
+  }
+  // ********************
+
+
   // ********** ABOUT DRAWING **********
   // draw when index is up and space bar is pressed
   if (indexUp(gesture) && keyIsPressed && key == " ")  {
@@ -180,9 +212,9 @@ function findIndex() {
     if (dist(tip[0], tip[1], base[0], base[1]) < height/10) {
       break;
     }
-    noFill();
-    stroke(0, 0, 255);
-    circle(tip[0]*sizeFactor, tip[1]*sizeFactor, 5);
+    noStroke();
+    fill(0, 0, 255);
+    circle(tip[0]*sizeFactor, tip[1]*sizeFactor, strokeSizes[sizeIdx]*2+1);
     return [tip[0]*sizeFactor, tip[1]*sizeFactor];
   }
   return null;
@@ -197,7 +229,13 @@ function findGesture() {
   // order: [thumb, index, middle, ring, pinky]
   for (let i = 0; i < predictions.length; i += 1) {
     const prediction = predictions[i];
-    let fingers = [prediction.annotations.thumb, prediction.annotations.indexFinger, prediction.annotations.middleFinger, prediction.annotations.ringFinger, prediction.annotations.pinky];
+    let fingers = [
+      prediction.annotations.thumb,
+      prediction.annotations.indexFinger,
+      prediction.annotations.middleFinger,
+      prediction.annotations.ringFinger,
+      prediction.annotations.pinky
+    ];
     //console.log(fingers);
     for (let i = 0; i < 5; i++) {
       let finger = fingers[i];
@@ -224,6 +262,13 @@ function peaceSymbolUp(gesture) {
 }
 
 
+// Returns true if the index and pinkie fingers are up
+// (ignores the thumb)
+function rockGestureUp(gesture) {
+  return (gesture[1] == 1 && gesture[2] == 0 && gesture[3] == 0 && gesture[4] == 1);
+}
+
+
 // Draws a line as a Catmull-Rom curve
 function drawLine(line) {
   beginShape();
@@ -245,6 +290,7 @@ function keyReleased() {
     cleanLine.push(currentLine[currentLine.length-1]);
     lines.push(cleanLine);
     colorOfLines.push(colorIdx);
+    sizeOfLines.push(sizeIdx);
     currentLine = [];
   }
 }
