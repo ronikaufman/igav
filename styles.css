@@ -1,6 +1,6 @@
 @font-face {
-    font-family: 'Hachi Maru Pop';
-    src: url(HachiMaruPop-Regular.ttf);
+    font-family: 'Montserrat';
+    src: url(Montserrat-Regular.ttf);
 }
   
 * {
@@ -12,24 +12,30 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 14px;
-    color: #363636;
+    color: #ffffff;
     text-align: center;
-	overflow-x: hidden;
+    background-color: #222222;
+    overflow-x: hidden;
+    transition-duration: 0.25s;
 }
 
 .header-wrapper {
     display: inline-block;
     width: 100%;
     max-width: 1024px;
-    padding: 4em 1.5em 3em;
+    padding: 4em 1.5em 2.5em;
 }
 
 .main-title {
-    font-family: 'Hachi Maru Pop', Arial, Helvetica, sans-serif;
-    font-size: 2em;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 1.75em;
     line-height: 1.25em;
-    text-transform: capitalize;
-    padding-bottom: .5em;
+}
+
+.mode-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .modal-wrapper {
@@ -52,35 +58,53 @@ body {
     background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
 }
 
-.modal-button {
+.modal-button,
+.mode-button {
     display: inline-block;
-    background-color: #363636;
+    background-color: #333333;
     font-size: 1em;
     text-align: center;
     text-decoration: none;
     text-transform: uppercase;
     color: #ffffff;
-    border-top: none;
-    border-right: none;
-    border-bottom: 2px solid #363636;
-    border-left: 2px solid #363636;
-    border-bottom-left-radius: 10px;
-    padding: 1em 2em;
+    padding: 1em 1.5em;
     transition-duration: 0.4s;
     cursor: pointer;
 }
 
-.modal-button:hover {
+.modal-button {
+    border-top: none;
+    border-right: none;
+    border-bottom: 2px solid #333333;
+    border-left: 2px solid #333333;
+    border-bottom-left-radius: 10px;
+}
+
+.mode-button {
+    border-top: none;
+    border-right: 2px solid #333333;
+    border-bottom: 2px solid #333333;
+    border-left: none;
+    border-bottom-right-radius: 10px;
+}
+
+.modal-button:hover,
+.mode-button:hover {
     background-color: #ffffff;
-    color: #363636;
-  }
+    color: #333333;
+}
+
+.modal-button:focus,
+.mode-button:focus {
+    outline: none;
+}
 
 .modal-content {
     background-color: #ffffff;
     margin: auto;
     padding: 2em;
     width: 90%;
-    max-width: 750px;
+    max-width: 650px;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -88,11 +112,14 @@ body {
 }
 
 .modal-title {
-    font-size: 2em;
+    color: #333333;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 1.75em;
     font-weight: bold;
 }
 
 .modal-text {
+    color: #222222;
     line-height: 1.3em;
     padding-top: 1em;
 }
@@ -109,7 +136,7 @@ body {
   
 .close:hover,
 .close:focus {
-    color: #000;
+    color: #222222;
     text-decoration: none;
     cursor: pointer;
 }
@@ -119,13 +146,17 @@ body {
     left: 0;
     bottom: 0;
     width: 100%;
-    background-color: #363636;
+    background-color: #333333;
     text-align: center;
 }
-
 
 .authors {
     color: #ffffff;
     font-size: 1em;
     padding: 1em;
+}
+
+.light-mode {
+    background-color: #ffffff;
+    color: #333333;
 }

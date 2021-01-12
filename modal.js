@@ -25,3 +25,13 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+
+
+
+// ********** LIGHT MODE **********
+
+// Add the class to the body
+function myFunction() {
+  var element = document.body;
+  element.classList.toggle("light-mode");
+}

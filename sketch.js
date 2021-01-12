@@ -24,7 +24,7 @@ const CHANGE_COLOR_TIME = 20; // how much frames with the "peace" gesture are ne
 const CHANGE_SIZE_TIME = 20; // how much frames with the "peace" gesture are needed to change color
 
 function setup() {
-  let h = windowHeight - 60 - 147;
+  let h = windowHeight - 60 - 121;
   sizeFactor = h/480;
   createCanvas(640*sizeFactor, h);
   video = createCapture(VIDEO);
