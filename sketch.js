@@ -1,6 +1,7 @@
 let handpose;
 let video;
 let predictions = [];
+let toggle = document.getElementById('toggle');
 
 let sizeFactor;
 let lines = []; // array of drawn lines (each line is an array)
@@ -284,9 +285,17 @@ function drawLine(line) {
 function keyReleased() {
   if (key == " ") { // stop drawing
     let cleanLine = [currentLine[0]];
-    for (let i = 0; i < currentLine.length; i += 3) {
-      cleanLine.push(currentLine[i]);
+    if (toggle.checked) {
+      for (let i = 0; i < currentLine.length; i += 3) {
+        cleanLine.push(currentLine[i]);
+      }
     }
+    else {
+      for (let i = 0; i < currentLine.length; i += 1) {
+        cleanLine.push(currentLine[i]);
+      }
+    }
+    
     cleanLine.push(currentLine[currentLine.length-1]);
     lines.push(cleanLine);
     colorOfLines.push(colorIdx);

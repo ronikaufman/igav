@@ -160,3 +160,78 @@ body {
     background-color: #ffffff;
     color: #333333;
 }
+
+.main-toggle {
+    position: absolute;
+    right: 120px;
+    bottom: 70px;
+}
+
+.toggle-title {
+    margin-bottom: 20px;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 1.15em;
+    line-height: 1.25em;
+}
+
+.toggle {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    background-color: #cecece;
+    transition: .4s;
+    -webkit-transition: .4s;
+    cursor: pointer;
+  }
+  
+  .toggle:before {
+    bottom: 4px;
+    left: 4px;
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    transition: .7s;
+    -webkit-transition: .7s;
+    
+  }
+
+.change {
+        
+    width: 48px;
+    height: 28px;
+    display: inline-block;
+    position: relative;
+  }
+  
+  .change input { 
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+  
+  
+  input:checked + .toggle {
+    background-color: rgb(1, 145, 78);
+  }
+  
+  input:focus + .toggle {
+    box-shadow: 0 0 2px rgb(1, 145, 78);
+  }
+  
+  input:checked + .toggle:before {
+    transform: translateX(20px);
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+  }
+  
+  .toggle.rounded {
+    border-radius: 30px;
+  }
+  
+  .toggle.rounded:before {
+    border-radius: 50%;
+  }
