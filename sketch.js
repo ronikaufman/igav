@@ -14,15 +14,15 @@ let colorOfLines = []; // color index of each line
 let changeColorCounter = 0; // counts how many frames since the last color change
 let stayColorCounter = 0; // counts how many frames since we didn't try to change color
 
-let strokeSizes = [2, 4, 8]; // possible drawing colors
-let sizeIdx = 0; // current color index
-let sizeOfLines = []; // color index of each line
-let changeSizeCounter = 0; // counts how many frames since the last color change
-let staySizeCounter = 0; // counts how many frames since we didn't try to change color
+let strokeSizes = [2, 4, 8]; // possible stroke sizes
+let sizeIdx = 0; // current stroke size index
+let sizeOfLines = []; // stroke size index of each line
+let changeSizeCounter = 0; // counts how many frames since the last stroke size change
+let staySizeCounter = 0; // counts how many frames since we didn't try to change stroke size
 
-const ERASE_TIME = 30; // how much frames on the erase button are needed to erase
-const CHANGE_COLOR_TIME = 20; // how much frames with the "peace" gesture are needed to change color
-const CHANGE_SIZE_TIME = 20; // how much frames with the "peace" gesture are needed to change color
+const ERASE_TIME = 30; // how many frames on the erase button are needed to erase
+const CHANGE_COLOR_TIME = 20; // how many frames with the "peace" gesture are needed to change color
+const CHANGE_SIZE_TIME = 20; // how many frames with the "rock" gesture are needed to change stroke size
 
 function setup() {
   let h = windowHeight - 60 - 121;
@@ -285,17 +285,14 @@ function drawLine(line) {
 function keyReleased() {
   if (key == " ") { // stop drawing
     let cleanLine = [currentLine[0]];
+    let step = 1;
     if (toggle.checked) {
-      for (let i = 0; i < currentLine.length; i += 3) {
-        cleanLine.push(currentLine[i]);
-      }
+      step = 3;
     }
-    else {
-      for (let i = 0; i < currentLine.length; i += 1) {
-        cleanLine.push(currentLine[i]);
-      }
+    for (let i = 0; i < currentLine.length; i += 1) {
+      cleanLine.push(currentLine[i]);
     }
-    
+
     cleanLine.push(currentLine[currentLine.length-1]);
     lines.push(cleanLine);
     colorOfLines.push(colorIdx);
